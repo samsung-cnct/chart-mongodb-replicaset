@@ -105,6 +105,25 @@ spec:
             }
         ]'
     spec:
+      {{- if .Values.scheduling.affinity }}
+      {{- if .Values.scheduling.affinity.node }}
+      {{- if .Values.scheduling.affinity.node.labels }}
+      affinity:
+        nodeAffinity:
+          {{ .Values.scheduling.affinity.node.type }}:
+            nodeSelectorTerms:
+            - matchExpressions:
+                {{- range .Values.scheduling.affinity.node.labels }}
+                - key: {{ .key }}
+                  operator: {{ .operator }}
+                  values:
+                  {{- range .values }}
+                  - {{ . }}
+                  {{- end }}
+                {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: {{ template "name" . }}
           image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
@@ -160,6 +179,16 @@ spec:
               mountPath: /keydir
               readOnly: true
           {{- end }}
+          {{- if .Values.scheduling.tolerations }}
+      tolerations:
+      {{- range .Values.scheduling.tolerations }}
+      - key: {{ .key }}
+        value: {{ .value }}
+        operator: Equal
+        effect: {{ .effect }}
+      {{- end }}
+      {{- end }}
+
       volumes:
         - name: config
           configMap:
