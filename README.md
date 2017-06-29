@@ -1,5 +1,14 @@
 # MongoDB Helm Chart
 
+## Source of Material
+This chart was forked from [kubernets charts repository](https://github.com/kubernetes/charts/tree/master/stable/mongodb-replicaset) 
+
+* `init` folder was removed and placed in separate repository.  Please see [Samsung Github Repository](https://github.com/samsung-cnct/install-mongodb) on how to create init container
+
+### TODO
+
+* Add taints for scheduling
+
 ## Prerequisites Details
 * Kubernetes 1.5+ with Beta APIs enabled.
 * PV support on the underlying infrastructure.
@@ -33,8 +42,8 @@ The following tables lists the configurable parameters of the mongodb chart and 
 | `replicaSet`                    | Name of the replica set                                                   | rs0                                                 |
 | `replicas`                      | Number of replicas in the replica set                                     | 3                                                   |
 | `port`                          | MongoDB port                                                              | 27017                                               |
-| `installImage.name`             | Image name for the init container that establishes the replica set        | gcr.io/google_containers/mongodb-install            |
-| `installImage.tag`              | Image tag for the init container that establishes the replica set         | 0.3                                                 |
+| `installImage.name`             | Image name for the init container that establishes the replica set        | quay.io/samsung_cnct/install-mongodb                |
+| `installImage.tag`              | Image tag for the init container that establishes the replica set         | v0.1.0                                              |
 | `installImage.pullPolicy`       | Image pull policy for the init container that establishes the replica set | IfNotPresent                                        |
 | `image.name`                    | MongoDB image name                                                        | mongo                                               |
 | `image.tag`                     | MongoDB image tag                                                         | 3.4                                                 |
