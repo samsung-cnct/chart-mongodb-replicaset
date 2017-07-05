@@ -1,0 +1,33 @@
+{{- if .Values.networkPolicy }}
+{{- if .Values.networkPolicy.ingress }}
+{{- if .Values.networkPolicy.ingress.enabled }}
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "name" . }}-ingresspolicy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ template "name" . }}
+  ingress:
+  - from:
+    {{- if .Values.networkPolicy.ingress.namespaceLabels }}
+    - namespaceSelector:
+        matchLabels:
+          {{- range .Values.networkPolicy.ingress.namespaceLabels }}
+          {{ .key }}: {{ .value }}
+          {{- end }}
+    {{- end }}
+    {{- if .Values.networkPolicy.ingress.podLabels }}
+    - podSelector:
+        matchLabels:
+          {{- range .Values.networkPolicy.ingress.podLabels }}
+          {{ .key }}: {{ .value }}
+          {{- end }}
+    {{- end }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.configmap.net.port }}
+{{- end }}
+{{- end }}
+{{- end }}
