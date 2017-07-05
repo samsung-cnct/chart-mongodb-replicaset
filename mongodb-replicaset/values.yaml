@@ -29,6 +29,16 @@ scheduling:
 #    value: taintvalue
 #    effect: NoSchedule
 
+networkPolicy:
+  ingress:
+#    enabled: true
+#    namespaceLabels:
+#      - key: tenant
+#        value: customer1
+#    podLabels:
+#      - key: app
+#        value: frontend
+
 # Specs for the MongoDB image
 image:
   name: mongo
