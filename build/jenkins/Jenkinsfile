@@ -1,0 +1,62 @@
+podTemplate(label: 'chart-mongodb-replicaset', containers: [
+        containerTemplate(name: 'jnlp', image: 'quay.io/samsung_cnct/custom-jnlp:0.1', args: '${computer.jnlpmac} ${computer.name}'),
+        containerTemplate(name: 'helm-registry-agent', image: 'quay.io/samsung_cnct/helm-registry-agent:v0.1.5', ttyEnabled: true, command: 'cat', alwaysPullImage: true, resourceRequestMemory: '256Mi', resourceLimitMemory: '256Mi'),
+]) {
+    node('chart-mongodb-replicaset') {
+        customContainer('helm-registry-agent'){
+
+            stage('checkout') {
+                checkout scm
+            }
+
+            stage('Work around helm home inconsistency with jenkins user') {
+                kubesh('ln -sf /etc/helm ~/.helm')
+            }
+
+            stage('set release') {
+                kubesh('CHART_VER=$(git describe --tags --abbrev=0 | sed "s/^v//") CHART_REL=$(git rev-list --count v${CHART_VER}..HEAD) envsubst < build/Chart.yaml.in > mongodb-replicaset/Chart.yaml')
+            }
+
+            stage('lint') {
+                kubesh('helm lint mongodb-replicaset')
+            }
+
+            stage('release the release') {
+                if (env.BRANCH_NAME.startsWith('tags/v')) {
+                    withCredentials([usernamePassword(credentialsId: 'quay_key', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        kubesh("helm registry login quay.io -u $USERNAME -p $PASSWORD && cd mongodb-replicaset && helm registry push quay.io/samsung_cnct/mongodb-replicaset -c stable")
+                    }
+                } else {
+                    echo 'not tagged commit, not pushing to docker repo'
+                }
+            }
+        }
+    }
+}
+
+def kubesh(command) {
+    if (env.CONTAINER_NAME) {
+        if ((command instanceof String) || (command instanceof GString)) {
+            command = kubectl(command)
+        }
+
+        if (command instanceof LinkedHashMap) {
+            command["script"] = kubectl(command["script"])
+        }
+    }
+
+    sh(command)
+}
+
+def kubectl(command) {
+    "kubectl exec -i ${env.HOSTNAME} -c ${env.CONTAINER_NAME} -- /bin/bash -c 'cd ${env.WORKSPACE} && ${command}'"
+}
+
+def customContainer(String name, Closure body) {
+    withEnv(["CONTAINER_NAME=$name"]) {
+        body()
+    }
+}
+
+
+// vi: ft=groovy

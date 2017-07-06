@@ -1,7 +1,11 @@
 {{- if .Values.networkPolicy }}
 {{- if .Values.networkPolicy.ingress }}
 {{- if .Values.networkPolicy.ingress.enabled }}
+{{- if .Capabilities.APIVersions.Has "networking/v1"}}
+apiVersion: networking/v1
+{{- else }}
 apiVersion: extensions/v1beta1
+{{- end }}
 kind: NetworkPolicy
 metadata:
   name: {{ template "name" . }}-ingresspolicy
