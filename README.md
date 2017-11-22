@@ -1,3 +1,5 @@
+[![coverage report](https://git.cnct.io/common-tools/samsung-cnct_chart-mongodb-replicaset/badges/master/coverage.svg)](https://git.cnct.io/common-tools/samsung-cnct_chart-mongodb-replicaset/commits/master)
+
 # MongoDB Helm Chart
 
 ## Source of Material
